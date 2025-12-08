@@ -1,27 +1,18 @@
-import axios, { type AxiosResponse } from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import type { Movie } from '../types/movie';
-
-const BASE_URL = 'https://api.themoviedb.org/3/search/movie';
 
 interface MovieSearchResponse {
   page: number;
   results: Movie[];
-  total_results: number;
   total_pages: number;
+  total_results: number;
 }
 
-const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
-
-if (!TMDB_TOKEN) {
-  console.warn('TMDB token is missing! Please set VITE_TMDB_TOKEN in .env file.');
-}
+const API_URL = 'https://api.themoviedb.org/3/search/movie';
+const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
 
 export async function fetchMovies(query: string): Promise<Movie[]> {
-  if (!query.trim()) {
-    return [];
-  }
-
-  const config = {
+  const config: AxiosRequestConfig = {
     params: {
       query,
       include_adult: false,
@@ -29,14 +20,12 @@ export async function fetchMovies(query: string): Promise<Movie[]> {
       page: 1,
     },
     headers: {
-      Authorization: `Bearer ${TMDB_TOKEN}`,
+      Authorization: `Bearer ${TOKEN}`,
     },
   };
 
-  const response: AxiosResponse<MovieSearchResponse> = await axios.get(
-    BASE_URL,
-    config
-  );
+
+  const response = await axios.get<MovieSearchResponse>(API_URL, config);
 
   return response.data.results;
 }
